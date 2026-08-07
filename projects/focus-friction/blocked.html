@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Focus Friction</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font:16px/1.5 system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 15% 10%,#25375f 0,transparent 32%),radial-gradient(circle at 85% 90%,#24453d 0,transparent 28%),#09101d;color:#f8fafc}
+main{width:min(620px,100%);background:#121a2c;border:1px solid #2d3957;border-radius:24px;padding:32px;box-shadow:0 24px 80px #0008}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:#9fb5dd;font-weight:800}
+h1{font-size:34px;line-height:1.08;margin:8px 0 10px;letter-spacing:-.04em}
+.muted{color:#b9c4d8}.domain{display:inline-block;background:#202b46;border:1px solid #34415e;padding:5px 9px;border-radius:999px}
+input,button{width:100%;font:inherit;border-radius:12px;border:1px solid #405070;padding:13px;margin:7px 0}
+input{background:#0d1527;color:#fff}button{cursor:pointer;font-weight:800;background:#f8fafc;color:#111827}
+button.secondary{background:#202a43;color:#f8fafc}button.quiet{background:transparent;color:#cbd5e1}.hidden{display:none!important}
+#countdown{font-size:52px;font-weight:900;text-align:center;margin:14px 0}.message{min-height:24px;color:#fbbf24}
+hr{border:0;border-top:1px solid #2a3653;margin:22px 0}details summary{cursor:pointer;color:#cbd5e1}.small{font-size:13px}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Focus session active</div>
+  <h1>Was this click intentional?</h1>
+  <p class="muted">You tried to open <span id="domain" class="domain"></span>. Focus Friction adds a small pause, not a punishment.</p>
+  <section id="intentionSection" class="hidden">
+    <p><strong>What specific task requires this site right now?</strong></p>
+    <input id="intention" maxlength="280" placeholder="Example: I need one tutorial for my physics IA graph">
+    <button id="intentContinue">Continue for a few minutes</button>
+  </section>
+  <section id="delaySection" class="hidden">
+    <p class="muted">Let the impulse settle. You can continue when the timer ends.</p>
+    <div id="countdown"></div>
+    <button id="delayContinue" class="hidden">Continue intentionally</button>
+  </section>
+  <section id="vocabSection" class="hidden">
+    <p><strong id="vocabPrompt"></strong></p>
+    <input id="vocabAnswer" autocomplete="off" placeholder="Answer">
+    <button id="vocabContinue">Continue after challenge</button>
+  </section>
+  <button id="back" class="quiet">Go back instead</button>
+  <div id="message" class="message" role="status"></div>
+  <hr>
+  <details>
+    <summary>Emergency bypass</summary>
+    <p class="muted small">Use this when access is genuinely necessary. Your reason stays on this device and is never sent anywhere.</p>
+    <input id="reason" maxlength="280" placeholder="Why do you need access?">
+    <button id="bypass" class="secondary">Bypass temporarily</button>
+  </details>
+</main>
+<script src="core.js"></script>
+<script src="blocked.js"></script>
+</body>
+</html>
