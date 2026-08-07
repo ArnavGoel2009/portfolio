@@ -94,9 +94,13 @@
       : 0;
   }
 
-  function minutesSince(start, end = Date.now()) {
-    if (!Number.isFinite(Number(start))) return 0;
-    return Math.max(0, Math.round((Number(end) - Number(start)) / 60_000));
+  function completedSessionMinutes(session, now = Date.now()) {
+    if (!session) return 0;
+    const startedAt = Number(session.startedAt);
+    const endsAt = Number(session.endsAt);
+    if (!Number.isFinite(startedAt) || !Number.isFinite(endsAt) || endsAt <= startedAt) return 0;
+    const boundedEnd = Math.min(Number(now), endsAt);
+    return Math.max(0, Math.round((boundedEnd - startedAt) / 60_000));
   }
 
   function timeToMinutes(value) {
@@ -109,13 +113,20 @@
   function isScheduleActive(schedule, date = new Date()) {
     if (!schedule || !schedule.enabled) return false;
     const days = Array.isArray(schedule.days) ? schedule.days : [];
-    if (!days.includes(date.getDay())) return false;
     const start = timeToMinutes(schedule.start);
     const end = timeToMinutes(schedule.end);
     if (start === null || end === null || start === end) return false;
+
     const current = date.getHours() * 60 + date.getMinutes();
-    if (start < end) return current >= start && current < end;
-    return current >= start || current < end;
+    const day = date.getDay();
+
+    if (start < end) {
+      return days.includes(day) && current >= start && current < end;
+    }
+
+    const previousDay = (day + 6) % 7;
+    return (days.includes(day) && current >= start) ||
+      (days.includes(previousDay) && current < end);
   }
 
   function isFocusActive(config, state, now = Date.now(), date = new Date(now)) {
@@ -197,7 +208,7 @@
     startSession,
     isSessionActive,
     remainingSeconds,
-    minutesSince,
+    completedSessionMinutes,
     timeToMinutes,
     isScheduleActive,
     isFocusActive,
