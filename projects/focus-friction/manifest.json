@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Focus Friction",
+  "version": "1.0.0",
+  "description": "A privacy-first focus extension that adds intentional friction before distracting websites.",
+  "permissions": ["storage", "alarms", "declarativeNetRequest"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Focus Friction"
+  },
+  "options_page": "options.html",
+  "web_accessible_resources": [{
+    "resources": ["blocked.html", "blocked.js", "core.js"],
+    "matches": ["<all_urls>"]
+  }]
+}
