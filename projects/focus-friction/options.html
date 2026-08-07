@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Focus Friction Settings</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.55 system-ui,-apple-system,sans-serif;background:#0b1020;color:#f8fafc}
+main{max-width:900px;margin:0 auto;padding:34px 18px 70px}
+h1{font-size:34px;letter-spacing:-.04em;margin-bottom:4px}
+.lead{color:#aebbd1;max-width:720px}.card{background:#141c30;border:1px solid #293654;border-radius:18px;padding:20px;margin:16px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+textarea,input,select,button{font:inherit;width:100%;padding:11px;border-radius:10px;border:1px solid #415172}
+textarea,input,select{background:#0d1528;color:#fff}textarea{min-height:135px;resize:vertical}button{cursor:pointer;background:#f8fafc;color:#111827;font-weight:800}
+label{display:block;margin-top:10px}small,.muted{color:#aebbd1}.days{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}
+.days label{margin:0;background:#1f2942;padding:7px 10px;border-radius:9px}.days input{width:auto}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#0e172a;border:1px solid #273552;border-radius:14px;padding:16px}.stat strong{display:block;font-size:26px}
+@media(max-width:650px){.grid,.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body><main>
+<h1>Focus Friction</h1>
+<p class="lead">Configure the friction you want between an impulse and a distracting website. Everything below stays in Chrome local storage.</p>
+<section class="card"><h2>Blocked sites</h2><label>Domains, one per line<textarea id="blocked"></textarea></label><small>Examples: instagram.com, reddit.com, x.com</small></section>
+<section class="card"><h2>Focus defaults</h2><div class="grid">
+<label>Default focus minutes<input id="focusMinutes" type="number" min="1" max="240"></label>
+<label>Temporary unlock minutes<input id="unlockMinutes" type="number" min="1" max="120"></label>
+<label>Unlock friction<select id="mode"><option value="intention">Type a specific intention</option><option value="delay">Wait briefly</option><option value="vocabulary">Vocabulary challenge</option></select></label>
+<label>Delay seconds<input id="delaySeconds" type="number" min="0" max="120"></label>
+</div></section>
+<section class="card"><h2>Automatic schedule</h2><label><input id="scheduleEnabled" type="checkbox" style="width:auto"> Enable automatic protection</label><div class="days" id="days"></div><div class="grid"><label>Start <input id="scheduleStart" type="time"></label><label>End <input id="scheduleEnd" type="time"></label></div><small>Overnight windows are supported, for example 22:00 to 06:00.</small></section>
+<section class="card"><h2>Local statistics</h2><div class="stats"><div class="stat"><strong id="blocks">0</strong><span>blocked attempts</span></div><div class="stat"><strong id="unlocks">0</strong><span>intentional unlocks</span></div><div class="stat"><strong id="bypasses">0</strong><span>emergency bypasses</span></div><div class="stat"><strong id="minutes">0</strong><span>focus minutes</span></div></div><p class="muted">These counters are intentionally simple. The extension does not upload browsing history or reasons.</p></section>
+<button id="save">Save settings</button><p id="message" role="status"></p>
+</main><script src="core.js"></script><script src="options.js"></script></body></html>
