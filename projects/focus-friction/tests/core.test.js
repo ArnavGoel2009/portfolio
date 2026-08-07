@@ -23,13 +23,20 @@ const session = core.startSession(25, NOW);
 assert.strictEqual(core.isSessionActive(session, NOW + 24*60_000), true);
 assert.strictEqual(core.isSessionActive(session, NOW + 26*60_000), false);
 assert.strictEqual(core.remainingSeconds(session, NOW + 60_000), 24*60);
+assert.strictEqual(core.completedSessionMinutes(session, NOW + 10*60_000), 10);
+assert.strictEqual(core.completedSessionMinutes(session, NOW + 180*60_000), 25);
 
-const monday1930 = new Date("2026-08-10T19:30:00");
-const monday2230 = new Date("2026-08-10T22:30:00");
+const monday1930 = new Date(2026, 7, 10, 19, 30);
+const monday2230 = new Date(2026, 7, 10, 22, 30);
 assert.strictEqual(core.isScheduleActive({enabled:true,days:[1],start:"19:00",end:"22:00"}, monday1930), true);
 assert.strictEqual(core.isScheduleActive({enabled:true,days:[1],start:"19:00",end:"22:00"}, monday2230), false);
-const overnight = new Date("2026-08-10T23:30:00");
-assert.strictEqual(core.isScheduleActive({enabled:true,days:[1],start:"22:00",end:"06:00"}, overnight), true);
+
+const monday2330 = new Date(2026, 7, 10, 23, 30);
+const tuesday0130 = new Date(2026, 7, 11, 1, 30);
+const tuesday0630 = new Date(2026, 7, 11, 6, 30);
+assert.strictEqual(core.isScheduleActive({enabled:true,days:[1],start:"22:00",end:"06:00"}, monday2330), true);
+assert.strictEqual(core.isScheduleActive({enabled:true,days:[1],start:"22:00",end:"06:00"}, tuesday0130), true);
+assert.strictEqual(core.isScheduleActive({enabled:true,days:[1],start:"22:00",end:"06:00"}, tuesday0630), false);
 
 assert.strictEqual(core.domainMatches("m.youtube.com","youtube.com"), true);
 assert.strictEqual(core.domainMatches("notyoutube.com","youtube.com"), false);
@@ -60,4 +67,4 @@ const log = core.appendLocalLog([], {domain:"reddit.com",reason:"Need documentat
 assert.strictEqual(log.length, 1);
 assert.strictEqual(log[0].domain, "reddit.com");
 
-console.log("Focus Friction: all core unit tests passed.");
+console.log("Focus Friction reviewer tests passed.");
