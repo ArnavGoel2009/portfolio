@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Focus Friction</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{width:330px;margin:0;font:14px/1.45 system-ui,-apple-system,sans-serif;background:#0b1020;color:#f8fafc}
+main{padding:18px}
+h1{font-size:19px;margin:0 0 2px}
+.sub{color:#aab4c8;margin:0 0 14px}
+.card{background:#151c31;border:1px solid #26304a;border-radius:14px;padding:14px;margin:10px 0}
+.status{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dot{width:10px;height:10px;border-radius:999px;background:#64748b;display:inline-block;margin-right:6px}
+.dot.on{background:#34d399}
+.big{font-size:26px;font-weight:800;letter-spacing:-.03em}
+label{display:block;color:#cbd5e1;margin:8px 0 5px}
+input,button{font:inherit;border-radius:10px;border:1px solid #3a4664;padding:10px}
+input{width:100%;background:#0e1528;color:#fff}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+button{cursor:pointer;font-weight:750;background:#f8fafc;color:#111827}
+button.secondary{background:#202a45;color:#f8fafc}
+a{color:#9ac0ff;text-decoration:none}
+.foot{display:flex;justify-content:space-between;margin-top:14px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Focus Friction</h1>
+  <p class="sub">Make the next click intentional.</p>
+  <section class="card">
+    <div class="status">
+      <div><span id="dot" class="dot"></span><strong id="status">Checking…</strong></div>
+      <div id="timer" class="big">—</div>
+    </div>
+  </section>
+  <section class="card">
+    <label for="minutes">Focus session</label>
+    <input id="minutes" type="number" min="1" max="240" value="25">
+    <div class="row" style="margin-top:8px">
+      <button id="start">Start focus</button>
+      <button id="stop" class="secondary">Stop</button>
+    </div>
+  </section>
+  <div class="foot">
+    <a href="options.html" target="_blank">Settings & stats</a>
+    <span id="mode"></span>
+  </div>
+</main>
+<script src="core.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>
