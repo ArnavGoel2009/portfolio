@@ -1,0 +1,9 @@
+{
+  "project": "Focus Friction",
+  "version": "1.0.0",
+  "generated_date": "2026-08-07",
+  "automated_test_command": "node tests/core.test.js",
+  "automated_test_output": "Focus Friction: all core unit tests passed.",
+  "manual_browser_test": "pending",
+  "release_status": "REVIEW FIRST"
+}
