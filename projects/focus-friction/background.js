@@ -22,10 +22,27 @@ function setState(values) {
   return new Promise(resolve => chrome.storage.local.set(values, resolve));
 }
 
+async function finalizeExpiredSession(state, now = Date.now()) {
+  const session = state.session;
+  if (!session || FocusCore.isSessionActive(session, now) || Number(session.endsAt) > now) {
+    return state;
+  }
+
+  const elapsed = FocusCore.completedSessionMinutes(session, now);
+  const stats = {
+    ...state.stats,
+    focusMinutes: (state.stats.focusMinutes || 0) + elapsed
+  };
+  await setState({session: null, stats});
+  return {...state, session: null, stats};
+}
+
 async function refreshRules() {
-  const state = await getState();
-  const config = FocusCore.sanitizeConfig(state.config);
+  let state = await getState();
   const now = Date.now();
+  state = await finalizeExpiredSession(state, now);
+
+  const config = FocusCore.sanitizeConfig(state.config);
   const unlocks = FocusCore.cleanupUnlocks(state.unlocks, now);
   const active = FocusCore.isFocusActive(config, {session: state.session}, now);
 
@@ -43,7 +60,8 @@ async function refreshRules() {
   }
 
   const remaining = FocusCore.remainingSeconds(state.session, now);
-  await chrome.action.setBadgeText({text: remaining ? String(Math.ceil(remaining / 60)) : ""});
+  const badge = remaining ? String(Math.ceil(remaining / 60)) : (active ? "ON" : "");
+  await chrome.action.setBadgeText({text: badge});
   return {active, remaining, ruleCount: addRules.length};
 }
 
@@ -70,9 +88,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
-    const state = await getState();
-    const config = FocusCore.sanitizeConfig(state.config);
+    let state = await getState();
     const now = Date.now();
+    state = await finalizeExpiredSession(state, now);
+    const config = FocusCore.sanitizeConfig(state.config);
 
     if (message.type === "GET_STATUS") {
       sendResponse({
@@ -95,7 +114,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
     if (message.type === "STOP_SESSION") {
-      const elapsed = state.session ? FocusCore.minutesSince(state.session.startedAt, now) : 0;
+      const elapsed = FocusCore.completedSessionMinutes(state.session, now);
       const stats = {
         ...state.stats,
         focusMinutes: (state.stats.focusMinutes || 0) + elapsed
@@ -155,7 +174,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return;
     }
 
-    sendResponse({ok: false, error: "Unknown message type"});
-  })().catch(error => sendResponse({ok: false, error: error.message}));
+    sendResponse({ok:false, error:"Unknown message type"});
+  })().catch(error => sendResponse({ok:false, error:error.message}));
   return true;
 });
