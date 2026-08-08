@@ -3,6 +3,15 @@
   "date": "2026-08-08",
   "automated_test_command": "node tests/core.test.js",
   "automated_test_output": "ClearFlow Validation Console core tests passed.",
-  "manual_browser_ui_check": "pending",
-  "demo_records_excluded_from_metrics": true
+  "manual_browser_ui_check": "pending in a normal Chrome profile",
+  "demo_records_excluded_from_metrics": true,
+  "headless_chromium_integration_attempt": {
+    "status": "blocked_by_environment_policy_before_page_load",
+    "attempts": [
+      "file:// navigation",
+      "http://127.0.0.1 localhost navigation"
+    ],
+    "error": "net::ERR_BLOCKED_BY_ADMINISTRATOR",
+    "interpretation": "Environment limitation, not an application test pass or application failure."
+  }
 }
