@@ -1,0 +1,8 @@
+{
+  "project": "ClearFlow Validation Console",
+  "date": "2026-08-08",
+  "automated_test_command": "node tests/core.test.js",
+  "automated_test_output": "ClearFlow Validation Console core tests passed.",
+  "manual_browser_ui_check": "pending",
+  "demo_records_excluded_from_metrics": true
+}
