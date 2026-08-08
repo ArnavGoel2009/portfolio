@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClearFlow Validation Console</title><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="shell">
+<header class="hero">
+<div><p class="eyebrow">ClearFlow • controlled prototype evidence</p><h1>Validation Console</h1>
+<p class="lead">Log mock-pipe cleaning trials, track repeatability and export evidence without turning prototype observations into claims they cannot support.</p></div>
+<div class="status-card"><span>Storage</span><strong>Local only</strong><small>No server, account, telemetry or cloud sync.</small></div>
+</header>
+<section class="grid stats">
+<article><span>Total trials</span><strong id="totalTrials">0</strong></article>
+<article><span>Success rate</span><strong id="successRate">—</strong></article>
+<article><span>Median clear time</span><strong id="medianTime">—</strong></article>
+<article><span>Jam / stall rate</span><strong id="jamRate">—</strong></article>
+</section>
+<section class="panel"><div class="panel-head"><div><p class="eyebrow">New controlled trial</p><h2>Record evidence</h2></div><button id="sampleBtn" class="ghost" type="button">Load demo example</button></div>
+<form id="trialForm"><div class="form-grid">
+<label>Tool head<select id="toolHead" required><option value="">Select</option><option>Auger</option><option>Silt brush</option><option>Debris hook</option><option>Scoop</option><option>Pipe cleaner</option><option>Other</option></select></label>
+<label>Blockage surrogate<input id="blockage" maxlength="100" placeholder="e.g. wet silt + cotton fibre" required></label>
+<label>Trial duration (s)<input id="duration" type="number" min="0" step="0.1" placeholder="Only if measured"></label>
+<label>Outcome<select id="outcome" required><option value="">Select</option><option value="success">Cleared</option><option value="partial">Partially cleared</option><option value="fail">Not cleared</option></select></label>
+<label>Jam / stall observed?<select id="jammed" required><option value="">Select</option><option value="no">No</option><option value="yes">Yes</option></select></label>
+<label>Camera useful?<select id="cameraUseful"><option value="">Not tested</option><option value="yes">Yes</option><option value="no">No</option></select></label>
+</div><label class="wide">Notes / failure observation<textarea id="notes" maxlength="500" placeholder="Describe what actually happened. Record failures too."></textarea></label><div class="form-actions"><button type="submit">Save trial locally</button><span id="formMessage" role="status"></span></div></form></section>
+<section class="panel"><div class="panel-head"><div><p class="eyebrow">Evidence table</p><h2>Recorded trials</h2></div><div class="actions"><button id="exportCsv" class="ghost" type="button">Export CSV</button><button id="exportJson" class="ghost" type="button">Export JSON</button><button id="clearAll" class="danger" type="button">Clear local data</button></div></div><div class="table-wrap"><table><thead><tr><th>#</th><th>Date</th><th>Head</th><th>Surrogate</th><th>Outcome</th><th>Time</th><th>Jam</th><th>Camera</th><th>Notes</th><th></th></tr></thead><tbody id="trialRows"></tbody></table></div><p id="emptyState" class="empty">No real trials recorded yet. That is better than pretending there are.</p></section>
+<section class="panel claim-panel"><p class="eyebrow">Claim guardrail</p><h2>What this evidence can and cannot support</h2><div class="claim-grid"><div><h3>Safe after repeated controlled trials</h3><ul><li>Prototype cleared X of Y controlled mock blockages.</li><li>Median measured clearing time under the recorded test setup.</li><li>Observed jam/stall frequency in the recorded mock setup.</li><li>Camera usefulness as an operator feedback observation.</li></ul></div><div><h3>Not supported by this console alone</h3><ul><li>Real sewer field performance.</li><li>Worker safety outcomes or lives saved.</li><li>Exact gas concentration accuracy.</li><li>Municipal approval, adoption or deployment.</li></ul></div></div></section>
+</main><script src="core.js"></script><script src="app.js"></script></body></html>
