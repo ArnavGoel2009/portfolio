@@ -27,4 +27,4 @@ Open `index.html` in a modern browser.
 This tool does **not** establish real sewer field performance, worker safety outcomes, municipal approval/deployment, or calibrated hazardous-gas accuracy.
 
 ## Status
-Core data/metrics logic tested. Browser UI still requires a manual visual check in a real browser profile.
+Core data/metrics logic tested. Headless Chromium integration was attempted, but this managed environment blocked both file and localhost navigation before the page loaded (`ERR_BLOCKED_BY_ADMINISTRATOR`). A normal-browser visual/integration check therefore remains pending.
