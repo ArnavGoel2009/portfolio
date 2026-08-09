@@ -1,0 +1,8 @@
+id,length_mm,profile,qty
+W01-frame-top,1450,AL-45,2
+W01-frame-side,1200,AL-45,4
+W02-frame-top,1800,AL-45,2
+W02-frame-side,1350,AL-45,4
+W01-sash,1100,AL-SASH,4
+W02-sash,1400,AL-SASH,4
+mullion,950,AL-45,3
