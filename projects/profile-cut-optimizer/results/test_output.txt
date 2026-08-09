@@ -1,0 +1,12 @@
+test_boundary (test_optimizer.T.test_boundary) ... ok
+test_exact_not_worse (test_optimizer.T.test_exact_not_worse) ... ok
+test_ids (test_optimizer.T.test_ids) ... ok
+test_impossible (test_optimizer.T.test_impossible) ... ok
+test_kerf (test_optimizer.T.test_kerf) ... ok
+test_profiles (test_optimizer.T.test_profiles) ... ok
+test_random_no_overfill (test_optimizer.T.test_random_no_overfill) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+OK
