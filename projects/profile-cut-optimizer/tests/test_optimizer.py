@@ -14,4 +14,21 @@ class T(unittest.TestCase):
  def test_random_no_overfill(self):
   random.seed(7);ps=[Piece(str(i),random.randint(250,3000)) for i in range(100)]
   for alg in (first_fit_decreasing,best_fit_decreasing): self.assertTrue(all(used_length([p.length_mm for p in b],3)<=6000 for b in alg(ps,6000,3)))
+ def test_exact_matches_independent_bruteforce_oracle(self):
+  def brute(ps,stock,kerf):
+   best=len(ps);bars=[]
+   def rec(i):
+    nonlocal best
+    if len(bars)>=best:return
+    if i==len(ps):best=len(bars);return
+    p=ps[i]
+    for b in bars:
+     if used_length([x.length_mm for x in b],kerf)+p.length_mm+(kerf if b else 0)<=stock:
+      b.append(p);rec(i+1);b.pop()
+    bars.append([p]);rec(i+1);bars.pop()
+   rec(0);return best
+  random.seed(19)
+  for case in range(25):
+   ps=[Piece(str(i),random.randint(250,1800)) for i in range(random.randint(3,8))]
+   self.assertEqual(len(exact_branch_and_bound(ps,3000,3,max_pieces=8)),brute(ps,3000,3),case)
 if __name__=='__main__': unittest.main()
