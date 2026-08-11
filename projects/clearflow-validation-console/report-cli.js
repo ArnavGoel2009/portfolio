@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+const fs=require('fs'),A=require('./analysis');const p=process.argv[2];if(!p){console.error('Usage: node report-cli.js trials.json [report.json]');process.exit(2)}let rows;try{rows=JSON.parse(fs.readFileSync(p,'utf8'))}catch(e){console.error('Input error:',e.message);process.exit(2)}if(!Array.isArray(rows)){console.error('Input must be a JSON array');process.exit(2)}const out=A.report(rows);const text=JSON.stringify(out,null,2);if(process.argv[3])fs.writeFileSync(process.argv[3],text+'\n');else console.log(text);process.exitCode=out.evidenceGate.pass?0:1;
