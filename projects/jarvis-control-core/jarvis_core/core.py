@@ -73,15 +73,26 @@ class JarvisCore:
         return (r['status']==TaskStatus.READY.value or expired) and set(r.get('capabilities',[])).issubset(agent_caps) and r.get('attempts',0)<r.get('max_attempts',3) and self._deps_done(r,rows)
     def claim_next(self,agent,capabilities=None,lease_seconds=1800):
         caps=set(capabilities or []); self._acquire()
+        blocked=[]
         try:
             rows=self._read(); now=self.clock(); candidates=[(Task(**r),i) for i,r in enumerate(rows) if self._eligible(r,rows,caps,now)]
             if not candidates:return None
-            t,i=max(candidates,key=lambda x:(x[0].score,x[0].impact,x[0].urgency))
-            if rows[i].get('approval_required') and not rows[i].get('approval_granted'):
-                rows[i]['status']=TaskStatus.WAITING_APPROVAL.value; self._write(rows); self._audit('APPROVAL_BLOCKED',task_id=t.id,agent=agent); return None
+            candidates.sort(key=lambda x:(x[0].score,x[0].impact,x[0].urgency),reverse=True)
+            chosen=None
+            for t,i in candidates:
+                if rows[i].get('approval_required') and not rows[i].get('approval_granted'):
+                    rows[i]['status']=TaskStatus.WAITING_APPROVAL.value
+                    blocked.append(t.id)
+                    continue
+                chosen=(t,i)
+                break
+            if blocked:self._write(rows)
+            if chosen is None:return None
+            t,i=chosen
             rows[i]['status']=TaskStatus.CLAIMED.value; rows[i]['claimed_by']=agent; rows[i]['lease_until']=now+lease_seconds; rows[i]['attempts']=rows[i].get('attempts',0)+1
             self._write(rows); t=Task(**rows[i])
         finally:self._release()
+        for task_id in blocked:self._audit('APPROVAL_BLOCKED',task_id=task_id,agent=agent)
         self._audit('TASK_CLAIMED',task_id=t.id,agent=agent,attempt=t.attempts); return t
     def heartbeat(self,task_id,agent,lease_seconds=1800):
         self._acquire()
