@@ -1,6 +1,6 @@
 import tempfile,unittest
 from pathlib import Path
-from jarvis_core import JarvisCore,EvidenceError
+from jarvis_core import JarvisCore,EvidenceError,Runner,CallableWorker,WorkerResult
 class Clock:
  def __init__(self):self.t=1000
  def __call__(self):return self.t
@@ -24,17 +24,20 @@ class T(unittest.TestCase):
  def test_approval_gate(self):
   t=self.add(approval_required=True);self.assertIsNone(self.c.claim_next('a'));self.c.approve(t.id,'arnav');self.assertEqual(self.c.claim_next('a').id,t.id)
  def test_approval_task_does_not_starve_ready_work(self):
-  gated=self.c.add_task('approve me','jarvis',10,10,10,1,approval_required=True)
-  ready=self.c.add_task('safe work','jarvis',8,8,8,2)
-  claimed=self.c.claim_next('agent')
-  self.assertEqual(claimed.id,ready.id)
-  by={t['id']:t for t in self.c.snapshot()['tasks']}
-  self.assertEqual(by[gated.id]['status'],'WAITING_APPROVAL')
+  gated=self.c.add_task('approve me','jarvis',10,10,10,1,approval_required=True);ready=self.c.add_task('safe work','jarvis',8,8,8,2);claimed=self.c.claim_next('agent');self.assertEqual(claimed.id,ready.id);by={t['id']:t for t in self.c.snapshot()['tasks']};self.assertEqual(by[gated.id]['status'],'WAITING_APPROVAL')
  def test_idempotent_enqueue(self):
   a=self.add('same',idempotency_key='K');b=self.add('same',idempotency_key='K');self.assertEqual(a.id,b.id);self.assertEqual(len(self.c.snapshot()['tasks']),1)
  def test_retry_then_fail(self):
   t=self.add(max_attempts=2);self.c.claim_next('a');self.c.fail(t.id,'a','boom');self.assertEqual(self.c.snapshot()['counts']['READY'],1);self.c.claim_next('a');self.c.fail(t.id,'a','boom');self.assertEqual(self.c.snapshot()['counts']['FAILED'],1)
  def test_completion(self):
-  t=self.add();self.c.claim_next('a');self.c.complete(t.id,'a',[{'type':'test','ref':'13/13'}]);self.assertEqual(self.c.snapshot()['counts']['DONE'],1)
+  t=self.add();self.c.claim_next('a');self.c.complete(t.id,'a',[{'type':'test','ref':'ok'}]);self.assertEqual(self.c.snapshot()['counts']['DONE'],1)
  def test_audit(self):self.add();self.c.claim_next('a');self.assertGreaterEqual(len((Path(self.d.name)/'audit.jsonl').read_text().splitlines()),2)
+ def test_runner_executes_and_commits_evidence(self):
+  self.add(capabilities=['python']);w=CallableWorker('codex',['python'],lambda t:WorkerResult(True,[{'type':'artifact','ref':'demo.py'}],['mock worker']));out=Runner(self.c,self.clock).run_once(w);self.assertEqual(out['status'],'DONE');self.assertEqual(self.c.snapshot()['counts']['DONE'],1)
+ def test_runner_rejects_fake_success(self):
+  self.add(capabilities=['python']);w=CallableWorker('bad',['python'],lambda t:WorkerResult(True,[],[]));out=Runner(self.c,self.clock).run_once(w);self.assertEqual(out['status'],'REJECTED');self.assertEqual(self.c.snapshot()['counts']['FAILED'],1)
+ def test_runner_recovers_exception(self):
+  self.add(capabilities=['python'])
+  def boom(t):raise RuntimeError('crash')
+  out=Runner(self.c,self.clock).run_once(CallableWorker('codex',['python'],boom));self.assertEqual(out['status'],'RETRY');self.assertEqual(self.c.snapshot()['counts']['READY'],1)
 if __name__=='__main__':unittest.main()
