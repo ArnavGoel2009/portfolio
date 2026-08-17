@@ -9,15 +9,37 @@ class SubprocessWorker:
     Task input is a temporary JSON file. The child writes JSON to
     JARVIS_RESULT_PATH: {ok, evidence, limitations, error}.
     """
-    def __init__(self,name,capabilities,command,timeout=900,allowed_executables=None,cwd=None,env_allowlist=None):
+    def __init__(self,name,capabilities,command,timeout=900,allowed_executables=None,cwd=None,env_allowlist=None,max_result_bytes=1_000_000):
         if not isinstance(command,list) or not command: raise ValueError("command must be a non-empty argv list")
+        if timeout <= 0: raise ValueError("timeout must be positive")
+        if max_result_bytes <= 0: raise ValueError("max_result_bytes must be positive")
         self.name=name; self.capabilities=list(capabilities); self.command=list(command); self.timeout=timeout
         self.allowed_executables=set(allowed_executables or [Path(command[0]).name])
         self.cwd=str(cwd) if cwd else None; self.env_allowlist=set(env_allowlist or [])
+        self.max_result_bytes=max_result_bytes
     def _argv(self,task_file):
         exe=Path(self.command[0]).name
         if exe not in self.allowed_executables: raise PermissionError(f"executable not allowed: {exe}")
         return [part.replace("{task_file}",str(task_file)) for part in self.command]
+    def _invalid(self,message):
+        return WorkerResult(False,[],["invalid worker result"],message)
+    def _validate_result(self,data):
+        if not isinstance(data,dict): return self._invalid("result root must be an object")
+        if not isinstance(data.get("ok"),bool): return self._invalid("ok must be boolean")
+        evidence=data.get("evidence") or []
+        limitations=data.get("limitations") or []
+        error=data.get("error")
+        if not isinstance(evidence,list): return self._invalid("evidence must be a list")
+        if not isinstance(limitations,list) or any(not isinstance(x,str) for x in limitations):
+            return self._invalid("limitations must be a list of strings")
+        if error is not None and not isinstance(error,str): return self._invalid("error must be string or null")
+        for i,item in enumerate(evidence):
+            if not isinstance(item,dict): return self._invalid(f"evidence[{i}] must be an object")
+            if not isinstance(item.get("type"),str) or not item.get("type"):
+                return self._invalid(f"evidence[{i}].type must be a non-empty string")
+            if not isinstance(item.get("ref"),str) or not item.get("ref"):
+                return self._invalid(f"evidence[{i}].ref must be a non-empty string")
+        return WorkerResult(data["ok"],evidence,limitations,error)
     def execute(self,task):
         with tempfile.TemporaryDirectory(prefix="jarvis-worker-") as td:
             td=Path(td); task_file=td/"task.json"; result_file=td/"result.json"
@@ -34,7 +56,10 @@ class SubprocessWorker:
                 return WorkerResult(False,[],["subprocess exited non-zero"],err)
             if not result_file.exists():
                 return WorkerResult(False,[],["worker produced no result contract"],"missing JARVIS_RESULT_PATH output")
-            try: data=json.loads(result_file.read_text())
+            try:
+                if result_file.stat().st_size > self.max_result_bytes:
+                    return self._invalid(f"result exceeds {self.max_result_bytes} bytes")
+                data=json.loads(result_file.read_text())
             except Exception as exc:
-                return WorkerResult(False,[],["invalid worker result"],f"invalid result JSON: {exc}")
-            return WorkerResult(bool(data.get("ok")),list(data.get("evidence") or []),list(data.get("limitations") or []),data.get("error"))
+                return self._invalid(f"invalid result JSON: {exc}")
+            return self._validate_result(data)
