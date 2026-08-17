@@ -1,0 +1,22 @@
+JARVIS-2026-08-17-AM recovery validation
+
+Command:
+PYTHONPATH=. python -m unittest discover -s tests -v
+
+Result:
+Ran 32 tests in 3.912s
+OK
+
+Coverage exercised in this run:
+- scheduler priority, dependencies, capabilities, exclusive leases, heartbeat and lease recovery
+- approval gating and prevention of approval-blocked starvation
+- evidence-gated completion, idempotent enqueue, retries and exception recovery
+- subprocess worker success, missing result, nonzero exit and executable allowlist
+- malformed subprocess result contracts: non-object roots, string evidence, malformed evidence items
+- subprocess result size limit and no stuck CLAIMED state after malformed result
+- audit verification: DONE evidence/completion event, orphan events, timestamp monotonicity
+- active idempotency-key uniqueness while permitting a replacement after a FAILED task
+- executable state-verification CLI: zero exit for valid state, nonzero exit for corrupt state
+
+Important limitation:
+These are software regression tests. They validate JARVIS Control Core behavior; they do not prove production multi-model orchestration, external connector uptime, or autonomous computer control.
