@@ -32,5 +32,11 @@ class AuditVerifierTests(unittest.TestCase):
   d,p=self.write([a,b],[{'ts':1,'event':'TASK_ADDED','task_id':'1'},{'ts':2,'event':'TASK_ADDED','task_id':'2'}])
   try:self.assertIn('DUPLICATE_ACTIVE_IDEMPOTENCY_KEY',verify_state(p).errors)
   finally:d.cleanup()
+ def test_failed_key_can_be_reenqueued(self):
+  failed={'id':'1','status':'FAILED','idempotency_key':'k','evidence':[]}
+  replacement={'id':'2','status':'READY','idempotency_key':'k','evidence':[]}
+  d,p=self.write([failed,replacement],[{'ts':1,'event':'TASK_ADDED','task_id':'1'},{'ts':2,'event':'TASK_FAILED','task_id':'1'},{'ts':3,'event':'TASK_ADDED','task_id':'2'}])
+  try:self.assertNotIn('DUPLICATE_ACTIVE_IDEMPOTENCY_KEY',verify_state(p).errors)
+  finally:d.cleanup()
 
 if __name__=='__main__':unittest.main()
