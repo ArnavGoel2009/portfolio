@@ -25,13 +25,15 @@ def verify_state(state_dir:str|Path)->AuditReport:
  except Exception as e:
   return AuditReport(False,[f'TASKS_UNREADABLE:{type(e).__name__}'],0,0)
  ids=[str(t.get('id') or '') for t in tasks]
+ id_set=set(ids)
  if any(not x for x in ids): errors.append('TASK_WITHOUT_ID')
- if len(set(ids))!=len(ids): errors.append('DUPLICATE_TASK_ID')
- key_seen=set()
+ if len(id_set)!=len(ids): errors.append('DUPLICATE_TASK_ID')
+ active_keys=set()
  for t in tasks:
   k=t.get('idempotency_key')
-  if k and k in key_seen and t.get('status')!='FAILED': errors.append('DUPLICATE_ACTIVE_IDEMPOTENCY_KEY')
-  if k:key_seen.add(k)
+  if k and t.get('status')!='FAILED':
+   if k in active_keys: errors.append('DUPLICATE_ACTIVE_IDEMPOTENCY_KEY')
+   active_keys.add(k)
   if t.get('status')=='DONE' and not t.get('evidence'): errors.append(f'DONE_WITHOUT_EVIDENCE:{t.get("id")}')
  try:
   lines=[x for x in audit_path.read_text().splitlines() if x.strip()]
@@ -50,7 +52,7 @@ def verify_state(state_dir:str|Path)->AuditReport:
   elif last_ts is not None and ts<last_ts: errors.append(f'NON_MONOTONIC_TIMESTAMP:{n}')
   if isinstance(ts,(int,float)): last_ts=ts
   tid=e.get('task_id')
-  if tid and tid not in set(ids): errors.append(f'ORPHAN_EVENT:{n}:{tid}')
+  if tid and tid not in id_set: errors.append(f'ORPHAN_EVENT:{n}:{tid}')
  completed={e.get('task_id') for e in events if e.get('event')=='TASK_COMPLETED'}
  for t in tasks:
   if t.get('status')=='DONE' and t.get('id') not in completed: errors.append(f'DONE_WITHOUT_COMPLETION_EVENT:{t.get("id")}')
